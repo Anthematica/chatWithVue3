@@ -1,5 +1,9 @@
 <script setup>
 import Input from "../Input/Input.vue";
+import { useUsersStore } from "../../stores/users.js";
+import Contact from "../Contact/Contact.vue";
+
+const store = useUsersStore();
 </script>
 <template>
   <div class="left_chat">
@@ -69,6 +73,13 @@ import Input from "../Input/Input.vue";
           </svg>
         </div>
       </div>
+    </div>
+    <div class="contacts_container">
+      <Contact
+        v-for="user in store.users"
+        :key="user.id"
+        :user="user"
+      ></Contact>
     </div>
   </div>
   <!-- Chats -->
@@ -239,5 +250,11 @@ import Input from "../Input/Input.vue";
   height: 61%;
   padding: 30px;
   overflow-y: scroll;
+}
+
+.contacts_container {
+  padding-inline-end: 32px;
+  overflow-y: scroll;
+  height: 80%;
 }
 </style>
