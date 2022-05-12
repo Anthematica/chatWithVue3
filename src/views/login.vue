@@ -1,22 +1,80 @@
 <script setup>
 import { RouterLink, RouterView } from "vue-router";
+import { Form, Field, ErrorMessage } from "vee-validate";
+import { ref } from "vue";
+import ky from "ky";
+import router from "../router";
+
+const myForm = ref();
+function validateEmail(value) {
+  if (!value) {
+    return "This field es required";
+  }
+  // if the field is not a valid email
+  const regex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
+  if (!regex.test(value)) {
+    return "This field must be a valid email";
+  }
+
+  return true;
+}
+
+function validatePassword(value) {
+  if (!value) {
+    return "This field password is required";
+  }
+
+  return true;
+}
+
+async function onSubmit(values) {
+  const resp = await ky
+    .post("http://localhost:8000/api/login", {
+      json: values,
+      throwHttpErrors: false,
+    })
+    .json();
+
+  if (resp.errors) {
+    // const errors = buildFormikErrors(resp.errors);
+
+    myForm.value.setErrors(resp.errors);
+
+    return;
+  }
+
+  localStorage.setItem("access_token", resp.access_token);
+  router.push({ path: "/" });
+}
 </script>
 <template>
   <div class="form_container">
-    <form class="container">
+    <Form @submit="onSubmit" class="container" ref="myForm">
       <h2>Log in</h2>
       <p>
-        <input type="email" placeholder="Email" v-model="email" />
+        <Field
+          type="email"
+          placeholder="Email"
+          name="email"
+          :rules="validateEmail"
+        />
+        <ErrorMessage class="error_styles" name="email" />
       </p>
       <p>
-        <input type="password" placeholder="Password" v-model="password" />
+        <Field
+          type="password"
+          placeholder="Password"
+          name="password"
+          :rules="validatePassword"
+        />
+        <ErrorMessage class="error_styles" name="password" />
       </p>
-      <button type="submit">Submit</button>
+      <button>Submit</button>
 
       <RouterLink class="already_register" to="/register"
         >¿No tienes una cuenta?</RouterLink
       >
-    </form>
+    </Form>
   </div>
 
   <RouterView />
@@ -29,6 +87,10 @@ import { RouterLink, RouterView } from "vue-router";
   background-color: #3eaf7c;
   display: flex;
   align-items: center;
+}
+
+.error_styles {
+  color: red;
 }
 
 h2 {

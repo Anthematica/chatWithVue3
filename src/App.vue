@@ -7,7 +7,14 @@ import ky from "ky";
 const usersStore = useUsersStore();
 
 onBeforeMount(async () => {
-  const resp = await ky.get("http://localhost:8000/api/v1/users").json();
+  const accessToken = localStorage.getItem("access_token");
+  const resp = await ky
+    .get("http://localhost:8000/api/v1/users", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+    .json();
 
   usersStore.$patch({
     users: resp.data,

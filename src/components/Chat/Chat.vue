@@ -2,8 +2,17 @@
 import Input from "../Input/Input.vue";
 import { useUsersStore } from "../../stores/users.js";
 import Contact from "../Contact/Contact.vue";
+import { useLogUser } from "../../stores/logUser";
 
 const store = useUsersStore();
+const logUser = useLogUser();
+
+const withoutLogUser = store.users.filter((item) => {
+  return item.id !== logUser.logUser.id;
+});
+
+console.log(withoutLogUser);
+console.log(store.users, logUser.logUser);
 </script>
 <template>
   <div class="left_chat">
@@ -13,7 +22,7 @@ const store = useUsersStore();
           <div className="conected"></div>
         </div>
         <div className="profile-text">
-          <p className="good_morning">Anthony</p>
+          <p className="good_morning">{{ logUser.logUser.name }}</p>
           <p className="user_name">Last seen recently</p>
         </div>
       </div>
@@ -83,14 +92,14 @@ const store = useUsersStore();
     </div>
   </div>
   <!-- Chats -->
-  <div class="chats_container">
+  <div v-if="store.toggle" class="chats_container">
     <div className="chat_contact_info">
       <div className="profile-info">
         <div className="profile-photo">
           <div className="conected"></div>
         </div>
         <div className="profile-text">
-          <p className="good_morning">Anthony</p>
+          <p className="good_morning">{{ store.currentUser.name }}</p>
           <p className="user_name">Last seen recently</p>
         </div>
       </div>

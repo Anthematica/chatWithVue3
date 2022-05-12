@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import { useUsersStore } from "../../stores/users.js";
 
 const props = defineProps({
   user: {
@@ -7,9 +8,17 @@ const props = defineProps({
     type: Object,
   },
 });
+
+const store = useUsersStore();
+
+function toggleContact() {
+  store.$patch({ toggle: true });
+
+  store.$patch({ currentUser: props.user });
+}
 </script>
 <template>
-  <div className="contacts">
+  <div className="contacts" @click="toggleContact">
     <div className="profile-info">
       <div className="profile-photo">
         <div className="conected"></div>

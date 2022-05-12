@@ -1,5 +1,13 @@
 <script setup>
 import Chat from "../components/Chat/Chat.vue";
+import { useLogUser } from "../stores/logUser.js";
+import { onBeforeMount } from "vue";
+
+const store = useLogUser();
+
+onBeforeMount(() => {
+  store.logIn();
+});
 </script>
 
 <template>

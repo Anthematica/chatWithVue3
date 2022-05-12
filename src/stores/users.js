@@ -5,6 +5,8 @@ export const useUsersStore = defineStore("users", {
   state: () => {
     return {
       users: [],
+      toggle: false,
+      currentUser: [],
     };
   },
 

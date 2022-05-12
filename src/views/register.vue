@@ -1,52 +1,91 @@
 <script setup>
 import { RouterLink, RouterView } from "vue-router";
-import { reactive, computed } from "vue";
-import useValidate from "@vuelidate/core";
-import { required } from "@vuelidate/validators";
+import { Form, Field, ErrorMessage } from "vee-validate";
+import ky from "ky";
+import { ref } from "vue";
+import router from "../router/index.js";
 
-const state = reactive({
-  name: "",
-  email: "",
-  password: "",
-});
+function validateEmail(value) {
+  if (!value) {
+    return "This field es required";
+  }
+  // if the field is not a valid email
+  const regex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
+  if (!regex.test(value)) {
+    return "This field must be a valid email";
+  }
 
-const rules = computed(() => {
-  const localRules = {
-    name: { required },
-    email: { required },
-    password: { required },
-  };
+  return true;
+}
 
-  return localRules;
-});
+function validateName(value) {
+  if (!value) {
+    return "This field name is required";
+  }
 
-const v$ = useValidate(rules, state);
+  return true;
+}
+
+function validatePassword(value) {
+  if (!value) {
+    return "This field password is required";
+  }
+
+  return true;
+}
+const myForm = ref(null);
+
+async function onSubmit(values) {
+  const resp = await ky
+    .post("http://localhost:8000/api/register", {
+      json: values,
+      throwHttpErrors: false,
+    })
+    .json();
+
+  localStorage.setItem("access_token", resp.access_token);
+
+  router.push({ path: "/" });
+}
 </script>
 
 <template>
   <div class="form_container">
-    <form class="container">
+    <Form @submit="onSubmit" class="container" ref="myForm">
       <h2>Create an Account</h2>
       <p>
-        <input type="text" placeholder="Name" v-model="v$.name.$model" />
-        <span v-if="v$.name.$error"> Name field is required </span>
+        <Field
+          name="name"
+          type="text"
+          placeholder="Name"
+          :rules="validateName"
+        />
+        <ErrorMessage class="error_styles" name="name" />
       </p>
       <p>
-        <input type="email" placeholder="Email" v-model="v$.email.$model" />
+        <Field
+          name="email"
+          type="email"
+          placeholder="Email"
+          :rules="validateEmail"
+        />
+        <ErrorMessage class="error_styles" name="email" />
       </p>
       <p>
-        <input
+        <Field
+          name="password"
           type="password"
           placeholder="Password"
-          v-model="v$.password.$model"
+          :rules="validatePassword"
         />
+        <ErrorMessage class="error_styles" name="password" />
       </p>
-      <button type="submit">Log in</button>
+      <button>Log in</button>
 
       <RouterLink class="already_register" to="/login"
         >¿Ya tienes una cuenta?</RouterLink
       >
-    </form>
+    </Form>
   </div>
 
   <RouterView />
@@ -55,6 +94,10 @@ const v$ = useValidate(rules, state);
 <style>
 h2 {
   text-align: center;
+}
+
+.error_styles {
+  color: red;
 }
 
 .form_container {
